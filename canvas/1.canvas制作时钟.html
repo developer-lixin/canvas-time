@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			#canvas {
+				display: block;
+				margin: 80px auto; 
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas" width="500" height="500"></canvas>
+		<script>
+			(function(){
+				//------------------------------------
+				// 用来初始化一些变量
+				var c = document.getElementById('canvas');
+				var cxt = c.getContext("2d");
+				var W = cxt.canvas.width,H = cxt.canvas.height;
+				var r = W/2;
+				var remW = W/500;
+				var remH = H/500;
+				
+				
+				
+				//-----------------------------------
+				// 初始化主要逻辑
+				setInterval(time,30);
+				
+				
+				
+				
+				
+				//MDN CANVAS API
+				// ---------------------------------------
+				//  需求函数
+				// 需求1 绘制时钟的圆
+				function drawCir(cxt) {
+					cxt.save();
+					cxt.translate(r,r); // 把中心点从左上角到中心的位置
+					cxt.beginPath();
+					cxt.lineWidth = 10*remW;
+					cxt.arc(0,0,r-5*remW,0,2*Math.PI); // r-5  因为圆的起点是在边框中心的位置
+					cxt.stroke();
+					cxt.restore();
+				}
+				// 需求2： 绘制数字
+				function drawNum(cxt) {
+					var arr = [3,4,5,6,7,8,9,10,11,12,1,2];
+					cxt.save();
+					cxt.translate(r,r);
+					cxt.beginPath();
+					cxt.font = `${18*remW}px Arial`; // 设置字体，不用写行高
+					cxt.textAlign = "center"; // 让文本水平居中
+					cxt.textBaseline = "middle"; // 让文本垂直居中
+					arr.forEach((item,i)=>{ // ()=>() 相当于  function（）{}
+							// rad 圆是360度，有12个数，所以除以12 乘以i 算出每一个数的弧度； 以3点为x轴，12点为Y轴
+						var rad = 2*Math.PI/12*i;  
+						var x = Math.cos(rad) * (r - 32)*remW;
+						var y = Math.sin(rad) * (r - 32)*remW;
+						cxt.fillText(item,x,y);
+					})
+					cxt.restore();
+				}
+				// 需求3  绘制刻度
+				function drawPoint() {
+					var R = 0;
+					cxt.save(); // 绘制之前先保存路径
+					cxt.translate(r,r); // 位移中心点的位置
+					for(var i = 0; i < 60; i++) { // 循环所有的分针
+						//
+						var rad = 2 * Math.PI/60 * i; 
+						var x = Math.cos(rad) * (r - 18)*remW;
+						var y = Math.sin(rad) * (r - 18)*remW;
+						cxt.beginPath();
+						if(i%5 == 0) {
+							cxt.fillStyle = "darkturquoise";
+							R = 4;
+						} else {
+							cxt.fillStyle = "greenyellow";
+							R = 3;
+						}
+						cxt.arc(x,y,R*remW,0,2*Math.PI);
+						cxt.fill();
+					}
+					cxt.restore();
+				}
+				// 需求4 绘制时针
+				function drawHours(cxt,hour) { 
+					// 控制指针的指向
+					var rad = 2*Math.PI /12 * hour; 
+					cxt.save();
+					cxt.translate(r,r); // 位移中心点
+					cxt.rotate(rad);   // 接收弧度
+					cxt.beginPath();  // 开始绘制新的内容
+					cxt.lineTo(0,10*remW); // 起始位置
+					cxt.lineTo(0,-r*.55); // 结束位置
+					cxt.lineWidth = 6*remW; // 线条宽度
+					cxt.lineCap = "round"; // 让端点变成圆
+					cxt.stroke();
+					cxt.restore();
+				}
+				 drawHours(cxt,1)
+				 // 需求5 绘制分针
+				 function drawMini(cxt,mini) {
+				 	var rad = 2*Math.PI /60 * mini; 
+					cxt.save();
+					cxt.translate(r,r); // 位移中心点
+					cxt.rotate(rad);   // 接收弧度
+					cxt.beginPath();  // 开始绘制新的内容
+					cxt.lineTo(0,15*remW); // 起始位置
+					cxt.lineTo(0,-r*.7); // 结束位置
+					cxt.lineWidth = 4*remW; // 线条宽度
+					cxt.lineCap = "round"; // 让端点变成圆
+					cxt.strokeStyle = "blue";
+					cxt.stroke();
+					cxt.restore();
+				 }
+				drawMini(cxt,2)
+				// 需求6 绘制秒针
+				function drawSec(cxt,sec) {
+				 	var rad = 2*Math.PI /60 * sec; 
+					cxt.save();
+					cxt.translate(r,r); // 位移中心点
+					cxt.rotate(rad);   // 接收弧度
+					cxt.beginPath();  // 开始绘制新的内容
+					cxt.lineTo(-3*remW,20*remW); // 起始位置
+					cxt.lineTo(3*remW,20*remW);  // 底部宽的部分的位置
+					cxt.lineTo(1*remW,-(r-30)*remW); // 绘制窄边线条
+					cxt.lineTo(-1*remW,-(r-30)*remW); 
+					cxt.lineWidth = 4*remW; // 线条宽度
+					cxt.lineCap = "round"; // 让端点变成圆
+					cxt.fillStyle = "red";
+					cxt.fill(); // 填充
+					cxt.restore();
+				 }
+				drawSec(cxt,10)
+				//需求7 绘制小圆点
+				function drawCenter() {
+					cxt.save();
+					cxt.translate(r,r);
+					cxt.beginPath();
+					cxt.fillStyle = "#aaa";
+					cxt.arc(0,0,4*remW,0,2*Math.PI)
+					cxt.fill();
+					cxt.restore();
+				}
+				// 需求8 让时钟动起来
+				function time() {
+					var now = new Date();
+					var s = now.getSeconds();
+					var m = now.getMinutes() + s/60;
+					var h = now.getHours() + m/60;
+					cxt.clearRect(0,0,cxt.canvas.width,cxt.canvas.height);
+					drawCir(cxt);
+					drawNum(cxt);
+					drawPoint(cxt);
+					drawHours(cxt,h);
+					drawMini(cxt,m);
+					drawSec(cxt,s);
+					drawCenter(cxt);
+				}
+			})();
+		</script>
+	</body>
+</html>
